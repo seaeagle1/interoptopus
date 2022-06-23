@@ -850,7 +850,8 @@ pub trait CSharpWriter {
         for ctor in class.constructors() {
             // Ctor
             let without_common_prefix = ctor.name().replace(&common_prefix, "");
-            let prettified = IdPrettifier::from_rust_lower(&without_common_prefix);
+            let without_ffi = without_common_prefix.replace("_ffi", "");
+            let prettified = IdPrettifier::from_rust_lower(&without_ffi);
             let fn_name = prettified.to_camel_case();
             let rval = format!("static {}", context_type_name);
 
@@ -866,7 +867,8 @@ pub trait CSharpWriter {
         for function in class.methods() {
             // Main function
             let without_common_prefix = function.name().replace(&common_prefix, "");
-            let prettified = IdPrettifier::from_rust_lower(&without_common_prefix);
+            let without_ffi = without_common_prefix.replace("_ffi", "");
+            let prettified = IdPrettifier::from_rust_lower(&without_ffi);
             let fn_name = prettified.to_camel_case();
 
             // Write checked method. These are "normal" methods that accept
