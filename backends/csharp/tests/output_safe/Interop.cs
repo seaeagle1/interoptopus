@@ -18,9 +18,9 @@ namespace My.Company
         static Interop()
         {
             var api_version = Interop.pattern_api_guard();
-            if (api_version != 10722219666297254147ul)
+            if (api_version != 2858970216731622811ul)
             {
-                throw new TypeLoadException($"API reports hash {api_version} which differs from hash in bindings (10722219666297254147). You probably forgot to update / copy either the bindings or the library.");
+                throw new TypeLoadException($"API reports hash {api_version} which differs from hash in bindings (2858970216731622811). You probably forgot to update / copy either the bindings or the library.");
             }
         }
 
@@ -218,7 +218,7 @@ namespace My.Company
 
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_1")]
-        public static extern uint pattern_ascii_pointer_1(string x);
+        public static extern uint pattern_ascii_pointer_1([MarshalAs(UnmanagedType.LPUTF8Str)] string x);
 
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_2")]
@@ -226,11 +226,19 @@ namespace My.Company
 
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_len")]
-        public static extern uint pattern_ascii_pointer_len(string x, UseAsciiStringPattern y);
+        public static extern uint pattern_ascii_pointer_len([MarshalAs(UnmanagedType.LPUTF8Str)] string x, UseAsciiStringPattern y);
 
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_return_slice")]
         public static extern SliceUseAsciiStringPattern pattern_ascii_pointer_return_slice();
+
+
+        [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_return_utf8")]
+        public static extern IntPtr pattern_ascii_pointer_return_utf8();
+
+
+        [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ascii_pointer_param_utf8")]
+        public static extern uint pattern_ascii_pointer_param_utf8([MarshalAs(UnmanagedType.LPUTF8Str)] string x);
 
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "pattern_ffi_slice_1")]
@@ -408,7 +416,7 @@ namespace My.Company
         }
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "simple_service_new_with_string")]
-        public static extern FFIError simple_service_new_with_string(ref IntPtr context, string ascii);
+        public static extern FFIError simple_service_new_with_string(ref IntPtr context, [MarshalAs(UnmanagedType.LPUTF8Str)] string ascii);
 
         public static void simple_service_new_with_string_checked(ref IntPtr context, string ascii) {
             var rval = simple_service_new_with_string(ref context, ascii);;
@@ -673,7 +681,7 @@ namespace My.Company
             try
             {
                 var s = simple_service_lt_return_string_accept_slice(anon0, anon1_slice);;
-                return Marshal.PtrToStringAnsi(s);
+                return Marshal.PtrToStringUTF8(s);
             }
             finally
             {
@@ -1222,7 +1230,7 @@ namespace My.Company
         public string ReturnString()
         {
             var s = Interop.simple_service_return_string(_context);
-            return Marshal.PtrToStringAnsi(s);
+            return Marshal.PtrToStringUTF8(s);
         }
 
         public void MethodVoidFfiError()
@@ -1296,7 +1304,7 @@ namespace My.Company
         public string ReturnStringAcceptSlice(Sliceu8 anon1)
         {
             var s = Interop.simple_service_lt_return_string_accept_slice(_context, anon1);
-            return Marshal.PtrToStringAnsi(s);
+            return Marshal.PtrToStringUTF8(s);
         }
 
         public string ReturnStringAcceptSlice(byte[] anon1)

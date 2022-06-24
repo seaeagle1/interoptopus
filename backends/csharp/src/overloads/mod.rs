@@ -100,7 +100,7 @@ fn write_function_overloaded_invoke_with_error_handling(w: &mut IndentWriter, fu
         }
         CType::Pattern(TypePattern::AsciiPointer) => {
             indented!(w, [_], r#"var s = {};"#, fn_call)?;
-            indented!(w, [_], r#"return Marshal.PtrToStringAnsi(s);"#)?;
+            indented!(w, [_], r#"return Marshal.PtrToStringUTF8(s);"#)?;
         }
         CType::Primitive(PrimitiveType::Void) => {
             indented!(w, [_], r#"{};"#, fn_call)?;

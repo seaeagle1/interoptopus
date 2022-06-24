@@ -67,6 +67,17 @@ namespace interop_test
         }
 
         [Fact]
+        public void pattern_string_utf8()
+        {
+            string t = "Hello world, Καλημέρα κόσμε, コンニチハ";
+            uint r = Interop.pattern_ascii_pointer_param_utf8(t);
+            Assert.Equal((uint)34, r);
+
+            string v = Marshal.PtrToStringUTF8(Interop.pattern_ascii_pointer_return_utf8());
+            Assert.Equal(t, v);
+        }
+
+        [Fact]
         public void pattern_service_generated()
         {
             var simpleService = SimpleService.NewWith(123);
