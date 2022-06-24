@@ -75,6 +75,8 @@ pub fn ffi_inventory() -> Inventory {
             .register(function!(patterns::ascii_pointer::pattern_ascii_pointer_2))
             .register(function!(patterns::ascii_pointer::pattern_ascii_pointer_len))
             .register(function!(patterns::ascii_pointer::pattern_ascii_pointer_return_slice))
+            .register(function!(patterns::ascii_pointer::pattern_ascii_pointer_return_utf8))
+            .register(function!(patterns::ascii_pointer::pattern_ascii_pointer_param_utf8))
             .register(function!(patterns::slice::pattern_ffi_slice_1))
             .register(function!(patterns::slice::pattern_ffi_slice_2))
             .register(function!(patterns::slice::pattern_ffi_slice_3))

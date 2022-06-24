@@ -29,3 +29,19 @@ pub extern "C" fn pattern_ascii_pointer_return_slice() -> FFISlice<'static, UseA
     FFISlice::empty()
 }
 
+static RV:&[u8] = concat!("Hello world, Καλημέρα κόσμε, コンニチハ", "\0").as_bytes();
+
+#[ffi_function]
+#[no_mangle]
+pub extern "C" fn pattern_ascii_pointer_return_utf8() -> AsciiPointer<'static>
+{
+    AsciiPointer::from_slice_with_nul(RV).unwrap_or_default()
+}
+
+#[ffi_function]
+#[no_mangle]
+pub extern "C" fn pattern_ascii_pointer_param_utf8(x: AsciiPointer) -> u32
+{
+    let y = x.as_str().unwrap_or("");
+    y.chars().count() as u32
+}
