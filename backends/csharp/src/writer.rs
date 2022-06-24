@@ -170,8 +170,20 @@ pub trait CSharpWriter {
 
         let mut params = Vec::new();
         for (_, p) in function.signature().params().iter().enumerate() {
-            let the_type = self.converter().function_parameter_to_csharp_typename(p, function);
+            let mut the_type = self.converter().function_parameter_to_csharp_typename(p, function);
             let name = p.name();
+
+            // Add MarshalAs attributes
+            match p.the_type()
+            {
+                CType::Pattern(x) => match x {
+                    TypePattern::AsciiPointer => {
+                        the_type = "[MarshalAs(UnmanagedType.LPUTF8Str)] ".to_string() + &the_type;
+                    }
+                    _ => {}
+                }
+                _ => {}
+            }
 
             params.push(format!("{} {}", the_type, name));
         }
@@ -970,7 +982,7 @@ pub trait CSharpWriter {
             }
             CType::Pattern(TypePattern::AsciiPointer) => {
                 indented!(w, [_], r#"var s = {};"#, fn_call)?;
-                indented!(w, [_], r#"return Marshal.PtrToStringAnsi(s);"#)?;
+                indented!(w, [_], r#"return Marshal.PtrToStringUTF8(s);"#)?;
             }
             CType::Primitive(PrimitiveType::Void) => {
                 indented!(w, [_], r#"{};"#, fn_call)?;
