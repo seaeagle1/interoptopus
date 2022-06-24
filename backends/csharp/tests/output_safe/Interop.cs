@@ -1184,7 +1184,7 @@ namespace My.Company
             return Interop.simple_service_method_mut_self_ref_slice_limited(_context, ref x, out y, slice, slice2);
         }
 
-        public void MethodMutSelfFfiError(SliceMutu8 slice)
+        public void MethodMutSelfError(SliceMutu8 slice)
         {
             var rval = Interop.simple_service_method_mut_self_ffi_error(_context, slice);
             if (rval != FFIError.Ok)
@@ -1193,7 +1193,7 @@ namespace My.Company
             }
         }
 
-        public void MethodMutSelfFfiError(byte[] slice)
+        public void MethodMutSelfError(byte[] slice)
         {
             Interop.simple_service_method_mut_self_ffi_error(_context, slice);
         }
@@ -1233,7 +1233,7 @@ namespace My.Company
             return Marshal.PtrToStringUTF8(s);
         }
 
-        public void MethodVoidFfiError()
+        public void MethodVoidError()
         {
             var rval = Interop.simple_service_method_void_ffi_error(_context);
             if (rval != FFIError.Ok)
@@ -1312,7 +1312,7 @@ namespace My.Company
             return Interop.simple_service_lt_return_string_accept_slice(_context, anon1);
         }
 
-        public void MethodVoidFfiError()
+        public void MethodVoidError()
         {
             var rval = Interop.simple_service_lt_method_void_ffi_error(_context);
             if (rval != FFIError.Ok)

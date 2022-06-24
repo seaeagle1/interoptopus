@@ -83,7 +83,7 @@ namespace interop_test
             var simpleService = SimpleService.NewWith(123);
             var b = new byte[] { 1, 2, 3 } ;
             
-            simpleService.MethodMutSelfFfiError(b);
+            simpleService.MethodMutSelfError(b);
             var s1 = simpleService.ReturnString();
             var s2 = simpleService.ReturnString();
 
