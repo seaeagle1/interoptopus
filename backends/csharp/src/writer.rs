@@ -170,22 +170,22 @@ pub trait CSharpWriter {
 
         let mut params = Vec::new();
         for (_, p) in function.signature().params().iter().enumerate() {
-            let mut the_type = self.converter().function_parameter_to_csharp_typename(p, function);
+            let the_type = self.converter().function_parameter_to_csharp_typename(p, function);
             let name = p.name();
 
             // Add MarshalAs attributes
-            match p.the_type()
+            let attribute = match p.the_type()
             {
                 CType::Pattern(x) => match x {
                     TypePattern::AsciiPointer => {
-                        the_type = "[MarshalAs(UnmanagedType.LPUTF8Str)] ".to_string() + &the_type;
+                        "[MarshalAs(UnmanagedType.LPUTF8Str)] "
                     }
-                    _ => {}
+                    _ => ""
                 }
-                _ => {}
-            }
+                _ => ""
+            };
 
-            params.push(format!("{} {}", the_type, name));
+            params.push(format!("{}{} {}", attribute, the_type, name));
         }
 
         indented!(w, r#"public static extern {} {}({});"#, rval, name, params.join(", "))
