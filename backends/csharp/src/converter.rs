@@ -36,7 +36,7 @@ pub trait CSharpTypeConverter {
     }
 
     /// TODO Converts an opaque Rust struct `Context` to a C# struct ``.
-    fn opaque_to_typename(&self, _: &OpaqueType) -> String {
+    fn opaque_to_typename(&self, _x: &OpaqueType) -> String {
         // x.name().to_string()
         "IntPtr".to_string()
     }

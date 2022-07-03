@@ -856,7 +856,8 @@ pub trait CSharpWriter {
         w.indent();
         indented!(w, r#"private IntPtr _context;"#)?;
         w.newline()?;
-        indented!(w, r#"private {}() {{}}"#, context_type_name)?;
+        indented!(w, r#"internal {}() {{}}"#, context_type_name)?;
+        indented!(w, r#"internal {}(IntPtr ptr) {{ _context = ptr; }}"#, context_type_name)?;
         w.newline()?;
 
         for ctor in class.constructors() {
@@ -961,10 +962,24 @@ pub trait CSharpWriter {
         // Assemble actual function call.
         let context = if write_contxt_by_ref { if is_ctor { "ref self._context" } else { "ref _context"} } else { "_context" };
         let arg_tokens = names.iter().zip(types.iter()).map(|(n, t)| format!("{} {}", t, n)).collect::<Vec<_>>();
-        let fn_call = format!(r#"{}.{}({}{})"#, self.config().class, method_to_invoke, context, extra_args);
+
+        // rewrite Opaque types as C# types
+        let return_type;
+        let fn_call;
+        match function.signature().rval()
+        {
+            CType::Opaque(x) => {
+                return_type = x.rust_name();
+                fn_call = format!(r#"new {}({}.{}({}{}))"#, return_type, self.config().class, method_to_invoke, context, extra_args);
+            }
+            _ => {
+                return_type = rval;
+                fn_call = format!(r#"{}.{}({}{})"#, self.config().class, method_to_invoke, context, extra_args);
+            }
+        }
 
         // Write signature.
-        indented!(w, r#"public {} {}({})"#, rval, fn_name, arg_tokens.join(", "))?;
+        indented!(w, r#"public {} {}({})"#, return_type, fn_name, arg_tokens.join(", "))?;
         indented!(w, r#"{{"#)?;
 
         if is_ctor {
