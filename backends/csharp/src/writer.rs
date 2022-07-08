@@ -181,7 +181,10 @@ pub trait CSharpWriter {
                         "[MarshalAs(UnmanagedType.LPUTF8Str)] "
                     }
                     _ => ""
-                }
+                },
+                CType::ReadWritePointer(_) => {
+                    if name.contains("out_") {"[In,Out]"} else {""}
+                },
                 _ => ""
             };
 
