@@ -2,6 +2,7 @@ use crate::config::{Config, Unsafe, WriteTypes};
 use crate::converter::{CSharpTypeConverter, Converter};
 use crate::overloads::{Helper, OverloadWriter};
 use heck::ToLowerCamelCase;
+use std::ops::Deref;
 use interoptopus::lang::c::{CType, CompositeType, Constant, Documentation, EnumType, Field, FnPointerType, Function, Meta, PrimitiveType, Variant, Visibility, OpaqueType};
 use interoptopus::patterns::api_guard::inventory_hash;
 use interoptopus::patterns::callbacks::NamedCallback;
