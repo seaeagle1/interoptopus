@@ -1081,6 +1081,7 @@ pub trait CSharpWriter {
 
     fn write_builtins(&self, w: &mut IndentWriter) -> Result<(), Error> {
         if self.config().write_types.write_interoptopus_globals() {
+         /*
             indented!(w, r#"public class InteropException<T> : Exception"#)?;
             indented!(w, r#"{{"#)?;
             indented!(w, [_], r#"public T Error {{ get; private set; }}"#)?;
@@ -1091,6 +1092,7 @@ pub trait CSharpWriter {
             indented!(w, [_], r#"}}"#)?;
             indented!(w, r#"}}"#)?;
             w.newline()?;
+          */
         }
 
         Ok(())
