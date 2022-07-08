@@ -2,7 +2,7 @@ use crate::config::{Config, Unsafe, WriteTypes};
 use crate::converter::{CSharpTypeConverter, Converter};
 use crate::overloads::{Helper, OverloadWriter};
 use heck::ToLowerCamelCase;
-use interoptopus::lang::c::{CType, CompositeType, Constant, Documentation, EnumType, Field, FnPointerType, Function, Meta, PrimitiveType, Variant, Visibility};
+use interoptopus::lang::c::{CType, CompositeType, Constant, Documentation, EnumType, Field, FnPointerType, Function, Meta, PrimitiveType, Variant, Visibility, OpaqueType};
 use interoptopus::patterns::api_guard::inventory_hash;
 use interoptopus::patterns::callbacks::NamedCallback;
 use interoptopus::patterns::service::Service;
@@ -211,7 +211,7 @@ pub trait CSharpWriter {
                 self.write_type_definition_enum(w, e)?;
                 w.newline()?;
             }
-            CType::Opaque(_) => {}
+            CType::Opaque(o) => {self.write_type_definition_opaque(w, o)?; w.newline()?;}
             CType::Composite(c) => {
                 self.write_type_definition_composite(w, c)?;
                 w.newline()?;
@@ -836,6 +836,62 @@ pub trait CSharpWriter {
         Ok(())
     }
 
+    fn write_type_definition_opaque(&self, w: &mut IndentWriter, class: &OpaqueType) -> Result<(), Error> {
+        let context_type_name = class.rust_name();
+
+        self.write_documentation(w, class.meta().documentation())?;
+        indented!(
+            w,
+            r#"{} partial class {} : IDisposable"#,
+            self.config().visibility_types.to_access_modifier(),
+            context_type_name
+        )?;
+        indented!(w, r#"{{"#)?;
+        w.indent();
+        indented!(w, r#"private IntPtr _context;"#)?;
+        w.newline()?;
+        indented!(w, r#"internal {}() {{}}"#, context_type_name)?;
+        indented!(w, r#"internal {}(IntPtr ptr) {{ _context = ptr; }}"#, context_type_name)?;
+        w.newline()?;
+        indented!(w, r#"internal IntPtr Context => _context;"#)?;
+        w.newline()?;
+
+        // search if this object is a service pattern, if true skip Dispose() creation
+        let mut write_destructor = true;
+        for pattern in self.inventory().patterns() {
+            match pattern {
+                LibraryPattern::Service(cls) => {
+                    if cls.the_type().rust_name() == context_type_name
+                    { write_destructor = false; }
+                }
+            }
+        }
+
+        if write_destructor
+        {
+            indented!(w, r#"public void Dispose() {{"#)?;
+            w.indent();
+            indented!(w, r#"{}.destroy_{}(_context);"#, self.config().class, context_type_name.to_lowercase())?;
+            indented!(w, r#"GC.SuppressFinalize(this);"#)?;
+            w.unindent();
+            indented!(w, r#"}}"#)?;
+            w.newline()?;
+        }
+
+        indented!(w, r#"~{}() {{"#, context_type_name)?;
+        w.indent();
+        indented!(w, r#"this.Dispose();"#)?;
+        w.unindent();
+        indented!(w, r#"}}"#)?;
+        w.newline()?;
+
+        w.unindent();
+        indented!(w, r#"}}"#)?;
+        w.newline()?;
+        w.newline()?;
+        Ok(())
+    }
+
     fn write_pattern_service(&self, w: &mut IndentWriter, class: &Service) -> Result<(), Error> {
         self.debug(w, "write_pattern_service")?;
         let mut all_functions = class.constructors().to_vec();
@@ -854,10 +910,6 @@ pub trait CSharpWriter {
         )?;
         indented!(w, r#"{{"#)?;
         w.indent();
-        indented!(w, r#"private IntPtr _context;"#)?;
-        w.newline()?;
-        indented!(w, r#"internal {}() {{}}"#, context_type_name)?;
-        indented!(w, r#"internal {}(IntPtr ptr) {{ _context = ptr; }}"#, context_type_name)?;
         w.newline()?;
 
         for ctor in class.constructors() {
@@ -901,8 +953,6 @@ pub trait CSharpWriter {
             w.newline()?;
         }
 
-        indented!(w, r#"public IntPtr Context => _context;"#)?;
-
         w.unindent();
         indented!(w, r#"}}"#)?;
         w.newline()?;
@@ -936,7 +986,7 @@ pub trait CSharpWriter {
 
             // If we call the checked function we want to resolve a `SliceU8` to a `byte[]`,
             // but if we call the unchecked version we want to keep that `Sliceu8` in our signature.
-            let native = self.converter().to_typespecifier_in_param(p.the_type());
+            let mut native = self.converter().to_typespecifier_in_param(p.the_type());
 
             // Forward `ref` and `out` accordingly.
             if native.contains("out ") {
@@ -944,7 +994,17 @@ pub trait CSharpWriter {
             } else if native.contains("ref ") {
                 to_invoke.push(format!("ref {}", name.to_string()));
             } else {
-                to_invoke.push(name.to_string());
+                match p.the_type()
+                {
+                    CType::ReadWritePointer(t) => match t.deref() {
+                        CType::Opaque(u) => {
+                            to_invoke.push(format!("{}.Context", name.to_string()));
+                            native = u.rust_name().to_string();
+                        },
+                        _ => to_invoke.push(name.to_string() ),
+                    },
+                    _ => to_invoke.push(name.to_string()),
+                }
             }
 
             names.push(name);

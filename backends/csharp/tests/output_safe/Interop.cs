@@ -718,6 +718,101 @@ namespace My.Company
         X = 0,
     }
 
+    public partial class Generic2u8 : IDisposable
+    {
+        private IntPtr _context;
+
+        internal Generic2u8() {}
+        internal Generic2u8(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+        public void Dispose() {
+            Interop.destroy_generic2u8(_context);
+        }
+
+    }
+
+
+
+    public partial class Generic3 : IDisposable
+    {
+        private IntPtr _context;
+
+        internal Generic3() {}
+        internal Generic3(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+        public void Dispose() {
+            Interop.destroy_generic3(_context);
+        }
+
+    }
+
+
+
+    public partial class Generic4 : IDisposable
+    {
+        private IntPtr _context;
+
+        internal Generic4() {}
+        internal Generic4(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+        public void Dispose() {
+            Interop.destroy_generic4(_context);
+        }
+
+    }
+
+
+
+    public partial class Opaque : IDisposable
+    {
+        private IntPtr _context;
+
+        internal Opaque() {}
+        internal Opaque(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+        public void Dispose() {
+            Interop.destroy_opaque(_context);
+        }
+
+    }
+
+
+
+    /// Some struct we want to expose as a class.
+    public partial class SimpleService : IDisposable
+    {
+        private IntPtr _context;
+
+        internal SimpleService() {}
+        internal SimpleService(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+    }
+
+
+
+    public partial class SimpleServiceLifetime : IDisposable
+    {
+        private IntPtr _context;
+
+        internal SimpleServiceLifetime() {}
+        internal SimpleServiceLifetime(IntPtr ptr) { _context = ptr; }
+
+        internal IntPtr Context => _context;
+
+    }
+
+
+
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public partial struct Array
@@ -1056,9 +1151,6 @@ namespace My.Company
     /// Some struct we want to expose as a class.
     public partial class SimpleService : IDisposable
     {
-        private IntPtr _context;
-
-        private SimpleService() {}
 
         /// The constructor must return a `Result<Self, Error>`.
         public static SimpleService NewWith(uint some_value)
@@ -1251,15 +1343,11 @@ namespace My.Company
             }
         }
 
-        public IntPtr Context => _context;
     }
 
 
     public partial class SimpleServiceLifetime : IDisposable
     {
-        private IntPtr _context;
-
-        private SimpleServiceLifetime() {}
 
         public static SimpleServiceLifetime NewWith(ref uint some_value)
         {
@@ -1321,7 +1409,6 @@ namespace My.Company
             }
         }
 
-        public IntPtr Context => _context;
     }
 
 
